@@ -94,13 +94,9 @@ export default class App extends React.Component {
     this.setState({ paramValues: newParamValues });
   }
   render() {
-    const { values, selected, paramFields, val, paramValues } = this.state;
+    const { values, selected, paramFields } = this.state;
     return (
       <div className="App">
-        <ul>
-          <li>{JSON.stringify(val)}</li>
-          <li>{JSON.stringify(paramValues)}</li>
-        </ul>
         {selected.map((i, ndx) => <h1 key={i.label + ndx}>{i.label}</h1>)}
         <div style={{ width: '600px', textAlign: 'left' }}>
           <Fragment>
