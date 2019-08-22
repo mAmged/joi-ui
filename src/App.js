@@ -1,4 +1,4 @@
-import React, { Fragment, } from 'react';
+import React, { Fragment, createRef} from 'react';
 import './App.css';
 import Select from 'react-select';
 import Textfield from '@atlaskit/textfield';
@@ -16,11 +16,16 @@ export default class App extends React.Component {
       selected: [],
       functionsChain: [], // a game player
       paramFields: [],
-      paramValues: []
+      paramValues: [],
+      menuIsOpen: true,
+      closeMenuOnSelect: false
     }
+    this.selectRef = createRef();
   }
   componentDidMount = () => {
     this.updateAvaliableFunctions();
+    this.selectRef.current.focus()
+    document.querySelector('.basic-single').querySelector('input').style.opacity = 1;
   }
 
   updateAvaliableFunctions = () => {
@@ -31,12 +36,11 @@ export default class App extends React.Component {
     this.setState({ val: null, paramFields: [], paramValues: [] });
   }
   applyLabelBeforeSubmit(val) {
-    if (this.state.val.argsLength > 0) {
+    if (val.argsLength > 0) {
       val = {
         ...val,
-        label: `${this.state.val.label}(${this.state.paramValues.join(',')})`
+        label: `${val.label}(${this.state.paramValues.join(',')})`
       }
-      debugger
     }
     return val;
   }
@@ -47,9 +51,11 @@ export default class App extends React.Component {
     this.setState({ selected: [...this.state.selected, val] });
     this.cleanCurrentEnteredValues()
     console.log('added new function to chain')
+    this.setState({ menuIsOpen: true})
   }
-  onChange = (val) => {
-    console.log('val', val)
+  onChange = (val,w,e) => {
+    window.slctRef = this.selectRef;
+    console.log('val', val, 'eee', e)
     this.setState({ val: {...val} })
     let selectedFns = selectFunction(val.value);
     console.log('selectedFns', selectedFns)
@@ -58,11 +64,16 @@ export default class App extends React.Component {
       let lst = listCurrentAvailableFunctions(selectedFns);
       console.log('lst', lst)
       this.addNewFunctionToChain(val)
+      window.slx = this.selectRef;
+      setTimeout(() => {
+        this.selectRef.current.focus();
+        document.querySelector('.basic-single').querySelector('input').style.opacity = 1;
+      })
+      
     }
     else {
       this.fucusParamInput()
-      this.setState({ paramFields: Array.from(Array(val.argsLength).keys()) })
-      // this.updateAvaliableFunctions();
+      this.setState({ closeMenuOnSelect: true, menuIsOpen:false, paramFields: Array.from(Array(val.argsLength).keys()) })
     }
   }
   fucusParamInput() {
@@ -94,21 +105,26 @@ export default class App extends React.Component {
     this.setState({ paramValues: newParamValues });
   }
   render() {
-    const { values, selected, paramFields } = this.state;
+    const { values, selected, paramFields, menuIsOpen, closeMenuOnSelect } = this.state;
     return (
       <div className="App">
         {selected.map((i, ndx) => <h1 key={i.label + ndx}>{i.label}</h1>)}
         <div style={{ width: '600px', textAlign: 'left' }}>
           <Fragment>
             <div style={{ width: '300px', display: 'inline-block', textAlign: 'left' }}>
+              <label>User Enter to input function</label>
               <Select
+                ref={this.selectRef}
                 className="basic-single"
                 classNamePrefix="select"
                 defaultValue={'defaultValue'}
                 isSearchable={true}
                 name="color"
+                closeMenuOnSelect={closeMenuOnSelect}
+                menuIsOpen={menuIsOpen}
                 options={values}
                 onChange={this.onChange}
+                isClearable={true}
                 value={this.state.val}
               />
             </div>
